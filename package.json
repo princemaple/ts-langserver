@@ -1,0 +1,33 @@
+{
+  "name": "ts-langserver",
+  "version": "0.4.2",
+  "description": "Language Server Protocol (LSP) implementation for TypeScript using tsserver",
+  "author": "TypeFox and others",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/princemaple/ts-langserver.git"
+  },
+  "files": [
+    "lib"
+  ],
+  "bin": {
+    "ts-langserver": "./lib/cli.js"
+  },
+  "dependencies": {
+    "command-exists": "1.2.6",
+    "commander": "^2.11.0",
+    "fs-extra": "^7.0.0",
+    "p-debounce": "^1.0.0",
+    "tempy": "^0.2.1",
+    "vscode-languageserver": "^6.1.0",
+    "vscode-uri": "^1.0.5",
+    "typescript": "^3.7.5"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^5.0.4",
+    "@types/p-debounce": "^1.0.0",
+    "@types/tempy": "^0.1.0",
+    "chai": "^4.1.2"
+  }
+}
