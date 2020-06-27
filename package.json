@@ -1,6 +1,6 @@
 {
   "name": "ts-langserver",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Language Server Protocol (LSP) implementation for TypeScript using tsserver",
   "author": "TypeFox and others",
   "license": "Apache-2.0",
@@ -20,8 +20,8 @@
     "fs-extra": "^7.0.0",
     "p-debounce": "^1.0.0",
     "tempy": "^0.2.1",
-    "typescript": "^3.8.3",
-    "vscode-languageserver": "^6.1.0",
+    "typescript": "^3.9.5",
+    "vscode-languageserver": "^6.1.1",
     "vscode-uri": "^1.0.5"
   },
   "devDependencies": {
