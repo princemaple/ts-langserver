@@ -1,6 +1,6 @@
 {
   "name": "ts-langserver",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Language Server Protocol (LSP) implementation for TypeScript using tsserver",
   "author": "TypeFox and others",
   "license": "Apache-2.0",
