@@ -6,14 +6,14 @@
  */
 
 import * as lsp from 'vscode-languageserver';
+import {TextDocument, TextDocumentContentChangeEvent} from 'vscode-languageserver-textdocument';
 
-export class LspDocument implements lsp.TextDocument {
-
-    protected document: lsp.TextDocument;
+export class LspDocument implements TextDocument {
+    protected document: TextDocument;
 
     constructor(doc: lsp.TextDocumentItem) {
-        const { uri, languageId, version, text } = doc;
-        this.document = lsp.TextDocument.create(uri, languageId, version, text);
+        const {uri, languageId, version, text} = doc;
+        this.document = TextDocument.create(uri, languageId, version, text);
     }
 
     get uri(): string {
@@ -69,21 +69,19 @@ export class LspDocument implements lsp.TextDocument {
         return lsp.Position.create(line, 0);
     }
 
-    applyEdit(version: number, change: lsp.TextDocumentContentChangeEvent): void {
+    applyEdit(version: number, change: TextDocumentContentChangeEvent): void {
         const content = this.getText();
         let newContent = change.text;
-        if (change.range) {
+        if ('range' in change) {
             const start = this.offsetAt(change.range.start);
             const end = this.offsetAt(change.range.end);
             newContent = content.substr(0, start) + change.text + content.substr(end);
         }
-        this.document = lsp.TextDocument.create(this.uri, this.languageId, version, newContent);
+        this.document = TextDocument.create(this.uri, this.languageId, version, newContent);
     }
-
 }
 
 export class LspDocuments {
-
     private readonly _files: string[] = [];
     private readonly documents = new Map<string, LspDocument>();
 
@@ -124,5 +122,4 @@ export class LspDocuments {
         this._files.splice(this._files.indexOf(file), 1);
         return document;
     }
-
 }
