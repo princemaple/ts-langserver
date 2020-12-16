@@ -7,11 +7,11 @@
 
 import * as tsp from 'typescript/lib/protocol';
 import * as lsp from 'vscode-languageserver';
-import { Logger } from './logger';
-import { pathToUri, toDiagnostic } from './protocol-translation';
-import { EventTypes } from './tsp-command-types';
-import debounce = require('p-debounce');
-import { LspDocuments } from './document';
+import {Logger} from './logger';
+import {pathToUri, toDiagnostic} from './protocol-translation';
+import {EventTypes} from './tsp-command-types';
+import debounce from 'p-debounce';
+import {LspDocuments} from './document';
 
 class FileDiagnostics {
     private readonly diagnosticsPerKind = new Map<EventTypes, tsp.Diagnostic[]>();
@@ -19,8 +19,8 @@ class FileDiagnostics {
     constructor(
         protected readonly uri: string,
         protected readonly publishDiagnostics: (params: lsp.PublishDiagnosticsParams) => void,
-        protected readonly documents: LspDocuments
-    ) { }
+        protected readonly documents: LspDocuments,
+    ) {}
 
     update(kind: EventTypes, diagnostics: tsp.Diagnostic[]): void {
         this.diagnosticsPerKind.set(kind, diagnostics);
@@ -28,7 +28,7 @@ class FileDiagnostics {
     }
     protected readonly firePublishDiagnostics = debounce(() => {
         const diagnostics = this.getDiagnostics();
-        this.publishDiagnostics({ uri: this.uri, diagnostics });
+        this.publishDiagnostics({uri: this.uri, diagnostics});
     }, 50);
 
     protected getDiagnostics(): lsp.Diagnostic[] {
@@ -43,23 +43,24 @@ class FileDiagnostics {
 }
 
 export class DiagnosticEventQueue {
-
     protected readonly diagnostics = new Map<string, FileDiagnostics>();
 
     constructor(
         protected readonly publishDiagnostics: (params: lsp.PublishDiagnosticsParams) => void,
         protected readonly documents: LspDocuments,
-        protected readonly logger: Logger
-    ) { }
+        protected readonly logger: Logger,
+    ) {}
 
     updateDiagnostics(kind: EventTypes, event: tsp.DiagnosticEvent): void {
         if (!event.body) {
-            this.logger.error(`Received empty ${event.event} diagnostics.`)
+            this.logger.error(`Received empty ${event.event} diagnostics.`);
             return;
         }
-        const { file } = event.body;
+        const {file} = event.body;
         const uri = pathToUri(file, this.documents);
-        const diagnostics = this.diagnostics.get(uri) || new FileDiagnostics(uri, this.publishDiagnostics, this.documents);
+        const diagnostics =
+            this.diagnostics.get(uri) ||
+            new FileDiagnostics(uri, this.publishDiagnostics, this.documents);
         diagnostics.update(kind, event.body.diagnostics);
         this.diagnostics.set(uri, diagnostics);
     }
