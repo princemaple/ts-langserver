@@ -7,8 +7,8 @@
 
 import * as lsp from 'vscode-languageserver';
 import * as tsp from 'typescript/lib/protocol';
-import URI from "vscode-uri";
-import { LspDocuments } from './document';
+import {URI} from 'vscode-uri';
+import {LspDocuments} from './document';
 
 export function uriToPath(stringUri: string): string | undefined {
     const uri = URI.parse(stringUri);
@@ -33,17 +33,20 @@ export function currentVersion(filepath: string, documents: LspDocuments | undef
 export function toPosition(location: tsp.Location): lsp.Position {
     return {
         line: location.line - 1,
-        character: location.offset - 1
-    }
+        character: location.offset - 1,
+    };
 }
 
-export function toLocation(fileSpan: tsp.FileSpan, documents: LspDocuments | undefined): lsp.Location {
+export function toLocation(
+    fileSpan: tsp.FileSpan,
+    documents: LspDocuments | undefined,
+): lsp.Location {
     return {
         uri: pathToUri(fileSpan.file, documents),
         range: {
             start: toPosition(fileSpan.start),
-            end: toPosition(fileSpan.end)
-        }
+            end: toPosition(fileSpan.end),
+        },
     };
 }
 
@@ -53,11 +56,11 @@ export function toFileRangeRequestArgs(file: string, range: lsp.Range): tsp.File
         startLine: range.start.line + 1,
         startOffset: range.start.character + 1,
         endLine: range.end.line + 1,
-        endOffset: range.end.character + 1
-    }
-};
+        endOffset: range.end.character + 1,
+    };
+}
 
-const symbolKindsMapping: { [name: string]: lsp.SymbolKind } = {
+const symbolKindsMapping: {[name: string]: lsp.SymbolKind} = {
     'enum member': lsp.SymbolKind.Constant,
     'JSX attribute': lsp.SymbolKind.Property,
     'local class': lsp.SymbolKind.Class,
@@ -80,37 +83,47 @@ const symbolKindsMapping: { [name: string]: lsp.SymbolKind } = {
     parameter: lsp.SymbolKind.Variable,
     property: lsp.SymbolKind.Property,
     setter: lsp.SymbolKind.Method,
-    var: lsp.SymbolKind.Variable
+    var: lsp.SymbolKind.Variable,
 };
 
 export function toSymbolKind(tspKind: string): lsp.SymbolKind {
-    return symbolKindsMapping[tspKind] || lsp.SymbolKind.Variable
+    return symbolKindsMapping[tspKind] || lsp.SymbolKind.Variable;
 }
 
 export function toDiagnosticSeverity(category: string): lsp.DiagnosticSeverity {
     switch (category) {
-        case 'error': return lsp.DiagnosticSeverity.Error
-        case 'warning': return lsp.DiagnosticSeverity.Warning
-        case 'suggestion': return lsp.DiagnosticSeverity.Hint
-        default: return lsp.DiagnosticSeverity.Error
+        case 'error':
+            return lsp.DiagnosticSeverity.Error;
+        case 'warning':
+            return lsp.DiagnosticSeverity.Warning;
+        case 'suggestion':
+            return lsp.DiagnosticSeverity.Hint;
+        default:
+            return lsp.DiagnosticSeverity.Error;
     }
 }
 
-export function toDiagnostic(diagnostic: tsp.Diagnostic, documents: LspDocuments | undefined): lsp.Diagnostic {
+export function toDiagnostic(
+    diagnostic: tsp.Diagnostic,
+    documents: LspDocuments | undefined,
+): lsp.Diagnostic {
     return {
         range: {
             start: toPosition(diagnostic.start),
-            end: toPosition(diagnostic.end)
+            end: toPosition(diagnostic.end),
         },
         message: diagnostic.text,
         severity: toDiagnosticSeverity(diagnostic.category),
         code: diagnostic.code,
         source: diagnostic.source || 'typescript',
-        relatedInformation: asRelatedInformation(diagnostic.relatedInformation, documents)
-    }
+        relatedInformation: asRelatedInformation(diagnostic.relatedInformation, documents),
+    };
 }
 
-export function asRelatedInformation(info: tsp.DiagnosticRelatedInformation[] | undefined, documents: LspDocuments | undefined): lsp.DiagnosticRelatedInformation[] | undefined {
+export function asRelatedInformation(
+    info: tsp.DiagnosticRelatedInformation[] | undefined,
+    documents: LspDocuments | undefined,
+): lsp.DiagnosticRelatedInformation[] | undefined {
     if (!info) {
         return undefined;
     }
@@ -118,10 +131,9 @@ export function asRelatedInformation(info: tsp.DiagnosticRelatedInformation[] | 
     for (const item of info) {
         const span = item.span;
         if (span) {
-            result.push(lsp.DiagnosticRelatedInformation.create(
-                toLocation(span, documents),
-                item.message
-            ));
+            result.push(
+                lsp.DiagnosticRelatedInformation.create(toLocation(span, documents), item.message),
+            );
         }
     }
     return result;
@@ -131,10 +143,10 @@ export function toTextEdit(edit: tsp.CodeEdit): lsp.TextEdit {
     return {
         range: {
             start: toPosition(edit.start),
-            end: toPosition(edit.end)
+            end: toPosition(edit.end),
         },
-        newText: edit.newText
-    }
+        newText: edit.newText,
+    };
 }
 
 function tagsMarkdownPreview(tags: tsp.JSDocTagInfo[]): string {
@@ -149,8 +161,11 @@ function tagsMarkdownPreview(tags: tsp.JSDocTagInfo[]): string {
         .join('  \n\n');
 }
 
-export function toMarkDown(documentation: tsp.SymbolDisplayPart[], tags: tsp.JSDocTagInfo[]): string {
-    let result = "";
+export function toMarkDown(
+    documentation: tsp.SymbolDisplayPart[],
+    tags: tsp.JSDocTagInfo[],
+): string {
+    let result = '';
     result += asPlainText(documentation);
     const tagsPreview = tagsMarkdownPreview(tags);
     if (tagsPreview) {
@@ -159,14 +174,17 @@ export function toMarkDown(documentation: tsp.SymbolDisplayPart[], tags: tsp.JSD
     return result;
 }
 
-export function toTextDocumentEdit(change: tsp.FileCodeEdits, documents: LspDocuments | undefined): lsp.TextDocumentEdit {
+export function toTextDocumentEdit(
+    change: tsp.FileCodeEdits,
+    documents: LspDocuments | undefined,
+): lsp.TextDocumentEdit {
     return {
         textDocument: {
             uri: pathToUri(change.fileName, documents),
-            version: currentVersion(change.fileName, documents)
+            version: currentVersion(change.fileName, documents),
         },
-        edits: change.textChanges.map(c => toTextEdit(c))
-    }
+        edits: change.textChanges.map(c => toTextEdit(c)),
+    };
 }
 
 export function toDocumentHighlight(item: tsp.DocumentHighlightsItem): lsp.DocumentHighlight[] {
@@ -175,39 +193,44 @@ export function toDocumentHighlight(item: tsp.DocumentHighlightsItem): lsp.Docum
             kind: toDocumentHighlightKind(i.kind),
             range: {
                 start: toPosition(i.start),
-                end: toPosition(i.end)
-            }
-        }
+                end: toPosition(i.end),
+            },
+        };
     });
 }
 
 // copied because the protocol module is not available at runtime (js version).
 enum HighlightSpanKind {
-    none = "none",
-    definition = "definition",
-    reference = "reference",
-    writtenReference = "writtenReference",
+    none = 'none',
+    definition = 'definition',
+    reference = 'reference',
+    writtenReference = 'writtenReference',
 }
 
 function toDocumentHighlightKind(kind: tsp.HighlightSpanKind): lsp.DocumentHighlightKind {
     switch (kind) {
-        case HighlightSpanKind.definition: return lsp.DocumentHighlightKind.Write
+        case HighlightSpanKind.definition:
+            return lsp.DocumentHighlightKind.Write;
         case HighlightSpanKind.reference:
-        case HighlightSpanKind.writtenReference: return lsp.DocumentHighlightKind.Read
-        default: return lsp.DocumentHighlightKind.Text
+        case HighlightSpanKind.writtenReference:
+            return lsp.DocumentHighlightKind.Read;
+        default:
+            return lsp.DocumentHighlightKind.Text;
     }
 }
 
 export function asRange(span: tsp.TextSpan): lsp.Range {
     return lsp.Range.create(
-        Math.max(0, span.start.line - 1), Math.max(0, span.start.offset - 1),
-        Math.max(0, span.end.line - 1), Math.max(0, span.end.offset - 1)
+        Math.max(0, span.start.line - 1),
+        Math.max(0, span.start.offset - 1),
+        Math.max(0, span.end.line - 1),
+        Math.max(0, span.end.offset - 1),
     );
 }
 
 export function asDocumentation(data: {
-    documentation?: tsp.SymbolDisplayPart[]
-    tags?: tsp.JSDocTagInfo[]
+    documentation?: tsp.SymbolDisplayPart[];
+    tags?: tsp.JSDocTagInfo[];
 }): lsp.MarkupContent | undefined {
     let value = '';
     const documentation = asPlainText(data.documentation);
@@ -220,10 +243,12 @@ export function asDocumentation(data: {
             value += '\n\n' + tagsDocumentation;
         }
     }
-    return value.length ? {
-        kind: lsp.MarkupKind.Markdown,
-        value
-    } : undefined;
+    return value.length
+        ? {
+              kind: lsp.MarkupKind.Markdown,
+              value,
+          }
+        : undefined;
 }
 
 export function asTagsDocumentation(tags: tsp.JSDocTagInfo[]): string {
