@@ -19,7 +19,7 @@
     "ts-langserver": "./lib/cli.js"
   },
   "dependencies": {
-    "command-exists": "1.2.6",
+    "command-exists": "1.2.9",
     "commander": "2.20.3",
     "fs-extra": "7.0.1",
     "p-debounce": "1.0.0",
