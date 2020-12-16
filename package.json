@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "command-exists": "1.2.9",
-    "commander": "2.20.3",
+    "commander": "6.2.1",
     "fs-extra": "9.0.1",
     "p-debounce": "2.1.0",
     "tempy": "1.0.0",
