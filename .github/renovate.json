@@ -10,5 +10,6 @@
       "automerge": true
     }
   ],
-  "requiredStatusChecks": null
+  "requiredStatusChecks": null,
+  "prConcurrentLimit": 0
 }
