@@ -12,7 +12,7 @@ import * as lspcalls from './lsp-protocol.calls.proposed';
 import * as tsp from 'typescript/lib/protocol';
 import * as fs from 'fs-extra';
 import * as commandExists from 'command-exists';
-import debounce = require('p-debounce');
+import debounce from 'p-debounce';
 
 import {CommandTypes, EventTypes} from './tsp-command-types';
 
