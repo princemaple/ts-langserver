@@ -6,13 +6,14 @@ A `typescript-language-server` fork.
 
 ### 2020-12-17
 
-- Updated to `vscode-languageserver` `7.0.0`
+- Update to `vscode-languageserver` `7.0.0`
+- Bring in https://github.com/theia-ide/typescript-language-server/pull/155
 
 ### Earlier
 
-- Fixed highlighting on Windows
-- Fixed various type warnings
-- Updated to TS4
+- Fix highlighting on Windows
+- Fix various type warnings
+- Update to TS4
 
 ## Installing
 
