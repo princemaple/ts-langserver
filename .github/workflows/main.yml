@@ -16,4 +16,6 @@ jobs:
 
       - run: npm install
 
+      - run: npm run checkFormat
+
       - run: npm run build
