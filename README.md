@@ -11,4 +11,17 @@ A `typescript-language-server` fork.
 ### Earlier
 
 - Fixed highlighting on Windows
+- Fixed various type warnings
 - Updated to TS4
+
+## Installing
+
+```sh
+npm install -g ts-langserver
+```
+
+## Running the language server
+
+```sh
+ts-langserver --stdio
+```
