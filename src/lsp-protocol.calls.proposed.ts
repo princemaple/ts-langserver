@@ -4,8 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { RequestType, RequestHandler } from 'vscode-jsonrpc';
-import { Location, SymbolKind, Range, DocumentSymbol } from 'vscode-languageserver-types';
+import {RequestType, RequestHandler} from 'vscode-jsonrpc';
+import {Location, SymbolKind, Range, DocumentSymbol} from 'vscode-languageserver-types';
 import * as lsp from 'vscode-languageserver';
 
 export interface CallsClientCapabilities {
@@ -24,7 +24,7 @@ export interface CallsClientCapabilities {
              */
             dynamicRegistration?: boolean;
         };
-    }
+    };
 }
 
 export interface CallsServerCapabilities {
@@ -40,7 +40,7 @@ export interface CallsServerCapabilities {
  * Thenable that resolves to such.
  */
 export namespace CallsRequest {
-    export const type = new RequestType<CallsParams, CallsResult, void, lsp.TextDocumentRegistrationOptions>('textDocument/calls');
+    export const type = new RequestType<CallsParams, CallsResult, void>('textDocument/calls');
     export type HandlerSignature = RequestHandler<CallsParams, CallsResult | null, void>;
 }
 
@@ -62,11 +62,11 @@ export enum CallDirection {
     /**
      * Incoming calls aka. callers
      */
-    Incoming = "incoming",
+    Incoming = 'incoming',
     /**
      * Outgoing calls aka. callees
      */
-    Outgoing = "outgoing",
+    Outgoing = 'outgoing',
 }
 
 /**
@@ -126,13 +126,12 @@ export interface DefinitionSymbol {
      * Must be contained by the the `range`.
      */
     selectionRange: Range;
-
 }
 
 export namespace DefinitionSymbol {
     export function create(uri: string, symbol: DocumentSymbol): DefinitionSymbol {
-        const { name, detail, kind, range, selectionRange } = symbol;
-        const location = { uri, range };
-        return { name, detail, kind, location, selectionRange };
+        const {name, detail, kind, range, selectionRange} = symbol;
+        const location = {uri, range};
+        return {name, detail, kind, location, selectionRange};
     }
 }
