@@ -50,7 +50,7 @@ import {
 import {collectDocumentSymbols, collectSymbolInformations} from './document-symbol';
 import {computeCallers, computeCallees} from './calls';
 
-export interface IServerOptions {
+export interface ServerOptions {
     logger: Logger;
     tsserverPath?: string;
     tsserverLogFile?: string;
@@ -67,7 +67,7 @@ export class LspServer {
 
     private readonly documents = new LspDocuments();
 
-    constructor(private options: IServerOptions) {
+    constructor(private options: ServerOptions) {
         this.logger = new PrefixingLogger(options.logger, '[lspserver]');
         this.diagnosticQueue = new DiagnosticEventQueue(
             diagnostics => this.options.lspClient.publishDiagnostics(diagnostics),
@@ -859,9 +859,7 @@ export class LspServer {
     /**
      * implemented based on https://github.com/Microsoft/vscode/blob/master/extensions/typescript-language-features/src/features/folding.ts
      */
-    async foldingRanges(
-        params: lsp.FoldingRangeRequestParam,
-    ): Promise<lsp.FoldingRange[] | undefined> {
+    async foldingRanges(params: lsp.FoldingRangeParams): Promise<lsp.FoldingRange[] | undefined> {
         const file = uriToPath(params.textDocument.uri);
         this.logger.log('foldingRanges', params, file);
         if (!file) {

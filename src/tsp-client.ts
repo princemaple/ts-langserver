@@ -13,10 +13,11 @@ import * as decoder from 'string_decoder';
 import * as protocol from 'typescript/lib/protocol';
 import * as tempy from 'tempy';
 
-import { CommandTypes } from './tsp-command-types';
-import { Logger, PrefixingLogger } from './logger';
-import { Deferred } from './utils';
-import { CancellationToken } from 'vscode-jsonrpc';
+import {CommandTypes} from './tsp-command-types';
+import {PrefixingLogger} from './logger';
+import {Deferred} from './utils';
+import {CancellationToken} from 'vscode-jsonrpc';
+import {Logger} from 'vscode-languageserver';
 
 export interface TspClientOptions {
     logger: Logger;
@@ -24,42 +25,66 @@ export interface TspClientOptions {
     logFile?: string;
     logVerbosity?: string;
     globalPlugins?: string[];
-    pluginProbeLocations?: string[]
+    pluginProbeLocations?: string[];
     onEvent?: (event: protocol.Event) => void;
 }
 
 interface TypeScriptRequestTypes {
-    'geterr': [protocol.GeterrRequestArgs, any],
-    'documentHighlights': [protocol.DocumentHighlightsRequestArgs, protocol.DocumentHighlightsResponse],
-    'applyCodeActionCommand': [protocol.ApplyCodeActionCommandRequestArgs, protocol.ApplyCodeActionCommandResponse];
-    'completionEntryDetails': [protocol.CompletionDetailsRequestArgs, protocol.CompletionDetailsResponse];
-    'completionInfo': [protocol.CompletionsRequestArgs, protocol.CompletionInfoResponse];
-    'completions': [protocol.CompletionsRequestArgs, protocol.CompletionsResponse];
-    'configure': [protocol.ConfigureRequestArguments, protocol.ConfigureResponse];
-    'definition': [protocol.FileLocationRequestArgs, protocol.DefinitionResponse];
-    'definitionAndBoundSpan': [protocol.FileLocationRequestArgs, protocol.DefinitionInfoAndBoundSpanReponse];
-    'docCommentTemplate': [protocol.FileLocationRequestArgs, protocol.DocCommandTemplateResponse];
-    'format': [protocol.FormatRequestArgs, protocol.FormatResponse];
-    'formatonkey': [protocol.FormatOnKeyRequestArgs, protocol.FormatResponse];
-    'getApplicableRefactors': [protocol.GetApplicableRefactorsRequestArgs, protocol.GetApplicableRefactorsResponse];
-    'getCodeFixes': [protocol.CodeFixRequestArgs, protocol.GetCodeFixesResponse];
-    'getCombinedCodeFix': [protocol.GetCombinedCodeFixRequestArgs, protocol.GetCombinedCodeFixResponse];
-    'getEditsForFileRename': [protocol.GetEditsForFileRenameRequestArgs, protocol.GetEditsForFileRenameResponse];
-    'getEditsForRefactor': [protocol.GetEditsForRefactorRequestArgs, protocol.GetEditsForRefactorResponse];
-    'getOutliningSpans': [protocol.FileRequestArgs, protocol.OutliningSpansResponse];
-    'getSupportedCodeFixes': [null, protocol.GetSupportedCodeFixesResponse];
-    'implementation': [protocol.FileLocationRequestArgs, protocol.ImplementationResponse];
-    'jsxClosingTag': [protocol.JsxClosingTagRequestArgs, protocol.JsxClosingTagResponse];
-    'navto': [protocol.NavtoRequestArgs, protocol.NavtoResponse];
-    'navtree': [protocol.FileRequestArgs, protocol.NavTreeResponse];
-    'occurrences': [protocol.FileLocationRequestArgs, protocol.OccurrencesResponse];
-    'organizeImports': [protocol.OrganizeImportsRequestArgs, protocol.OrganizeImportsResponse];
-    'projectInfo': [protocol.ProjectInfoRequestArgs, protocol.ProjectInfoResponse];
-    'quickinfo': [protocol.FileLocationRequestArgs, protocol.QuickInfoResponse];
-    'references': [protocol.FileLocationRequestArgs, protocol.ReferencesResponse];
-    'rename': [protocol.RenameRequestArgs, protocol.RenameResponse];
-    'signatureHelp': [protocol.SignatureHelpRequestArgs, protocol.SignatureHelpResponse];
-    'typeDefinition': [protocol.FileLocationRequestArgs, protocol.TypeDefinitionResponse];
+    geterr: [protocol.GeterrRequestArgs, any];
+    documentHighlights: [
+        protocol.DocumentHighlightsRequestArgs,
+        protocol.DocumentHighlightsResponse,
+    ];
+    applyCodeActionCommand: [
+        protocol.ApplyCodeActionCommandRequestArgs,
+        protocol.ApplyCodeActionCommandResponse,
+    ];
+    completionEntryDetails: [
+        protocol.CompletionDetailsRequestArgs,
+        protocol.CompletionDetailsResponse,
+    ];
+    completionInfo: [protocol.CompletionsRequestArgs, protocol.CompletionInfoResponse];
+    completions: [protocol.CompletionsRequestArgs, protocol.CompletionsResponse];
+    configure: [protocol.ConfigureRequestArguments, protocol.ConfigureResponse];
+    definition: [protocol.FileLocationRequestArgs, protocol.DefinitionResponse];
+    definitionAndBoundSpan: [
+        protocol.FileLocationRequestArgs,
+        protocol.DefinitionInfoAndBoundSpanReponse,
+    ];
+    docCommentTemplate: [protocol.FileLocationRequestArgs, protocol.DocCommandTemplateResponse];
+    format: [protocol.FormatRequestArgs, protocol.FormatResponse];
+    formatonkey: [protocol.FormatOnKeyRequestArgs, protocol.FormatResponse];
+    getApplicableRefactors: [
+        protocol.GetApplicableRefactorsRequestArgs,
+        protocol.GetApplicableRefactorsResponse,
+    ];
+    getCodeFixes: [protocol.CodeFixRequestArgs, protocol.GetCodeFixesResponse];
+    getCombinedCodeFix: [
+        protocol.GetCombinedCodeFixRequestArgs,
+        protocol.GetCombinedCodeFixResponse,
+    ];
+    getEditsForFileRename: [
+        protocol.GetEditsForFileRenameRequestArgs,
+        protocol.GetEditsForFileRenameResponse,
+    ];
+    getEditsForRefactor: [
+        protocol.GetEditsForRefactorRequestArgs,
+        protocol.GetEditsForRefactorResponse,
+    ];
+    getOutliningSpans: [protocol.FileRequestArgs, protocol.OutliningSpansResponse];
+    getSupportedCodeFixes: [null, protocol.GetSupportedCodeFixesResponse];
+    implementation: [protocol.FileLocationRequestArgs, protocol.ImplementationResponse];
+    jsxClosingTag: [protocol.JsxClosingTagRequestArgs, protocol.JsxClosingTagResponse];
+    navto: [protocol.NavtoRequestArgs, protocol.NavtoResponse];
+    navtree: [protocol.FileRequestArgs, protocol.NavTreeResponse];
+    occurrences: [protocol.FileLocationRequestArgs, protocol.OccurrencesResponse];
+    organizeImports: [protocol.OrganizeImportsRequestArgs, protocol.OrganizeImportsResponse];
+    projectInfo: [protocol.ProjectInfoRequestArgs, protocol.ProjectInfoResponse];
+    quickinfo: [protocol.FileLocationRequestArgs, protocol.QuickInfoResponse];
+    references: [protocol.FileLocationRequestArgs, protocol.ReferencesResponse];
+    rename: [protocol.RenameRequestArgs, protocol.RenameResponse];
+    signatureHelp: [protocol.SignatureHelpRequestArgs, protocol.SignatureHelpResponse];
+    typeDefinition: [protocol.FileLocationRequestArgs, protocol.TypeDefinitionResponse];
 }
 
 export class TspClient {
@@ -68,24 +93,30 @@ export class TspClient {
     private seq = 0;
 
     private readonly deferreds: {
-        [seq: number]: Deferred<any>
+        [seq: number]: Deferred<any>;
     } = {};
 
-    private logger: Logger
-    private tsserverLogger: Logger
+    private logger: PrefixingLogger;
+    private tsserverLogger: PrefixingLogger;
 
     private cancellationPipeName: string | undefined;
 
     constructor(private options: TspClientOptions) {
-        this.logger = new PrefixingLogger(options.logger, '[tsclient]')
-        this.tsserverLogger = new PrefixingLogger(options.logger, '[tsserver]')
+        this.logger = new PrefixingLogger(options.logger, '[tsclient]');
+        this.tsserverLogger = new PrefixingLogger(options.logger, '[tsserver]');
     }
 
     start() {
         if (this.readlineInterface) {
             return;
         }
-        const { tsserverPath, logFile, logVerbosity, globalPlugins, pluginProbeLocations } = this.options;
+        const {
+            tsserverPath,
+            logFile,
+            logVerbosity,
+            globalPlugins,
+            pluginProbeLocations,
+        } = this.options;
         const args: string[] = [];
         if (logFile) {
             args.push('--logFile', logFile);
@@ -94,19 +125,23 @@ export class TspClient {
             args.push('--logVerbosity', logVerbosity);
         }
         if (globalPlugins && globalPlugins.length) {
-            args.push('--globalPlugins', globalPlugins.join(','))
+            args.push('--globalPlugins', globalPlugins.join(','));
         }
         if (pluginProbeLocations && pluginProbeLocations.length) {
             args.push('--pluginProbeLocations', pluginProbeLocations.join(','));
         }
-        this.cancellationPipeName = tempy.file({ name: 'tscancellation' } as any);
+        this.cancellationPipeName = tempy.file({name: 'tscancellation'} as any);
         args.push('--cancellationPipeName', this.cancellationPipeName + '*');
         this.logger.info(`Starting tsserver : '${tsserverPath} ${args.join(' ')}'`);
-        const tsserverPathIsModule = path.extname(tsserverPath) === ".js";
+        const tsserverPathIsModule = path.extname(tsserverPath) === '.js';
         this.tsserverProc = tsserverPathIsModule
-            ? cp.fork(tsserverPath, args, { silent: true })
+            ? cp.fork(tsserverPath, args, {silent: true})
             : cp.spawn(tsserverPath, args);
-        this.readlineInterface = readline.createInterface(this.tsserverProc.stdout, this.tsserverProc.stdin, undefined);
+        this.readlineInterface = readline.createInterface(
+            this.tsserverProc.stdout,
+            this.tsserverProc.stdin,
+            undefined,
+        );
         process.on('exit', () => {
             this.readlineInterface.close();
             this.tsserverProc.stdin.destroy();
@@ -114,17 +149,17 @@ export class TspClient {
         });
         this.readlineInterface.on('line', line => this.processMessage(line));
 
-        const dec = new decoder.StringDecoder("utf-8");
+        const dec = new decoder.StringDecoder('utf-8');
         this.tsserverProc.stderr.addListener('data', data => {
             const stringMsg = typeof data === 'string' ? data : dec.write(data);
             this.tsserverLogger.error(stringMsg);
         });
     }
 
-    notify(command: CommandTypes.Open, args: protocol.OpenRequestArgs)
-    notify(command: CommandTypes.Close, args: protocol.FileRequestArgs)
-    notify(command: CommandTypes.Saveto, args: protocol.SavetoRequestArgs)
-    notify(command: CommandTypes.Change, args: protocol.ChangeRequestArgs)
+    notify(command: CommandTypes.Open, args: protocol.OpenRequestArgs);
+    notify(command: CommandTypes.Close, args: protocol.FileRequestArgs);
+    notify(command: CommandTypes.Saveto, args: protocol.SavetoRequestArgs);
+    notify(command: CommandTypes.Change, args: protocol.ChangeRequestArgs);
     notify(command: string, args: object): void {
         this.sendMessage(command, true, args);
     }
@@ -132,7 +167,7 @@ export class TspClient {
     request<K extends keyof TypeScriptRequestTypes>(
         command: K,
         args: TypeScriptRequestTypes[K][0],
-        token?: CancellationToken
+        token?: CancellationToken,
     ): Promise<TypeScriptRequestTypes[K][1]> {
         this.sendMessage(command, false, args);
         const seq = this.seq;
@@ -145,7 +180,9 @@ export class TspClient {
                     fs.writeFile(requestCancellationPipeName, '', err => {
                         if (!err) {
                             request.then(() =>
-                                fs.unlink(requestCancellationPipeName, () => { /* no-op */ })
+                                fs.unlink(requestCancellationPipeName, () => {
+                                    /* no-op */
+                                }),
                             );
                         }
                     });
@@ -160,14 +197,14 @@ export class TspClient {
         let request: protocol.Request = {
             command,
             seq: this.seq,
-            type: 'request'
+            type: 'request',
         };
         if (args) {
             request.arguments = args;
         }
-        const serializedRequest = JSON.stringify(request) + "\n";
+        const serializedRequest = JSON.stringify(request) + '\n';
         this.tsserverProc.stdin.write(serializedRequest);
-        this.logger.log(notification ? "notify" : "request", request);
+        this.logger.log(notification ? 'notify' : 'request', request);
     }
 
     protected processMessage(untrimmedMessageString: string): void {
@@ -192,7 +229,7 @@ export class TspClient {
 
     private resolveResponse(message: protocol.Message, request_seq: number, success: boolean) {
         const deferred = this.deferreds[request_seq];
-        this.logger.log('request completed', { request_seq, success });
+        this.logger.log('request completed', {request_seq, success});
         if (deferred) {
             if (success) {
                 this.deferreds[request_seq].resolve(message);
@@ -211,7 +248,9 @@ export class TspClient {
         return message.type === 'response';
     }
 
-    private isRequestCompletedEvent(message: protocol.Message): message is protocol.RequestCompletedEvent {
+    private isRequestCompletedEvent(
+        message: protocol.Message,
+    ): message is protocol.RequestCompletedEvent {
         return this.isEvent(message) && message.event === 'requestCompleted';
     }
 }

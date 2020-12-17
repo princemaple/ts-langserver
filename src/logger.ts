@@ -5,99 +5,94 @@
  * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import * as fs from 'fs';
-import { LspClient } from './lsp-client';
-import * as lsp from 'vscode-languageserver';
+import {LspClient} from './lsp-client';
+import {MessageType} from 'vscode-languageserver';
 
-/**
- * the logger type
- */
 export interface Logger {
-    error(...arg: any[]): void
-    warn(...arg: any[]): void
-    info(...arg: any[]): void
-    log(...arg: any[]): void
+    error(...arg: any[]): void;
+    warn(...arg: any[]): void;
+    info(...arg: any[]): void;
+    log(...arg: any[]): void;
 }
 
 export class LspClientLogger implements Logger {
-    constructor(protected client: LspClient, protected level: lsp.MessageType) { }
+    constructor(protected client: LspClient, protected level: MessageType) {}
 
-    protected sendMessage(severity: lsp.MessageType, messageObjects: any[]): void {
+    protected sendMessage(severity: MessageType, messageObjects: any[]): void {
         if (this.level >= severity) {
-            let message = messageObjects.map( p => {
-                if (typeof p === 'object') {
-                    return JSON.stringify(p, null, 2)
-                } else {
-                    return p
-                }
-            }).join(' ');
+            let message = messageObjects
+                .map(p => {
+                    if (typeof p === 'object') {
+                        return JSON.stringify(p, null, 2);
+                    } else {
+                        return p;
+                    }
+                })
+                .join(' ');
 
             this.client.logMessage({
                 type: severity,
-                message: message
-            })
+                message: message,
+            });
         }
     }
 
     error(...arg: any[]): void {
-        this.sendMessage(lsp.MessageType.Error, arg)
+        this.sendMessage(MessageType.Error, arg);
     }
 
     warn(...arg: any[]): void {
-        this.sendMessage(lsp.MessageType.Warning, arg)
+        this.sendMessage(MessageType.Warning, arg);
     }
 
     info(...arg: any[]): void {
-        this.sendMessage(lsp.MessageType.Info, arg)
+        this.sendMessage(MessageType.Info, arg);
     }
 
     log(...arg: any[]): void {
-        this.sendMessage(lsp.MessageType.Log, arg)
+        this.sendMessage(MessageType.Log, arg);
     }
+}
 
+function toString(...arg: any[]): string {
+    return arg.map(a => JSON.stringify(a, null, 2)).join('');
 }
 
 export class ConsoleLogger implements Logger {
-
     constructor(private isLogEnabled?: boolean) {}
 
-    private toStrings(...arg): string[] {
-        return (arg.map(a => JSON.stringify(a, null, 2)));
+    error(...arg: any[]) {
+        console.error(toString(...arg));
     }
-
-    error(...arg) {
-        console.error(...this.toStrings(arg));
+    warn(...arg: any[]) {
+        console.warn(toString(...arg));
     }
-    warn(...arg) {
-        console.warn(...this.toStrings(arg));
+    info(...arg: any[]) {
+        console.info(toString(...arg));
     }
-    info(...arg) {
-        console.info(...this.toStrings(arg));
-    }
-    log(...arg) {
+    log(...arg: any[]) {
         if (this.isLogEnabled) {
-            console.log(...this.toStrings(arg));
+            console.log(toString(...arg));
         }
     }
 }
 
 export class PrefixingLogger implements Logger {
-
-    constructor(private logger: Logger, private prefix: string) { }
+    constructor(private logger: Logger, private prefix: string) {}
 
     error(...arg: any[]): void {
-        this.logger.error(this.prefix, ...arg);
+        this.logger.error(toString(this.prefix, ...arg));
     }
 
     warn(...arg: any[]): void {
-        this.logger.warn(this.prefix, ...arg);
+        this.logger.warn(toString(this.prefix, ...arg));
     }
 
     info(...arg: any[]): void {
-        this.logger.info(this.prefix, ...arg);
+        this.logger.info(toString(this.prefix, ...arg));
     }
 
     log(...arg: any[]): void {
-        this.logger.log(this.prefix, ...arg);
+        this.logger.log(toString(this.prefix, ...arg));
     }
 }

@@ -5,22 +5,23 @@
  * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import * as lsp from 'vscode-languageserver';
-import * as lspcalls from './lsp-protocol.calls.proposed'
+import * as lspcalls from './lsp-protocol.calls.proposed';
 
-import { Logger, LspClientLogger } from './logger';
-import { LspServer } from './lsp-server';
-import { LspClient, LspClientImpl } from './lsp-client';
+import {LspClientLogger} from './logger';
+import {LspServer} from './lsp-server';
+import {LspClientImpl} from './lsp-client';
+import {MessageType, Connection, ProposedFeatures} from 'vscode-languageserver';
+import {createConnection} from 'vscode-languageserver/node';
 
-export interface IServerOptions {
+export interface ServerOptions {
     tsserverPath: string;
     tsserverLogFile?: string;
     tsserverLogVerbosity?: string;
-    showMessageLevel: lsp.MessageType
+    showMessageLevel: MessageType;
 }
 
-export function createLspConnection(options: IServerOptions): lsp.IConnection {
-    const connection = lsp.createConnection();
+export function createLspConnection(options: ServerOptions): Connection {
+    const connection = createConnection(ProposedFeatures.all);
     const lspClient = new LspClientImpl(connection);
     const logger = new LspClientLogger(lspClient, options.showMessageLevel);
     const server: LspServer = new LspServer({
@@ -28,7 +29,7 @@ export function createLspConnection(options: IServerOptions): lsp.IConnection {
         lspClient,
         tsserverPath: options.tsserverPath,
         tsserverLogFile: options.tsserverLogFile,
-        tsserverLogVerbosity: options.tsserverLogVerbosity
+        tsserverLogVerbosity: options.tsserverLogVerbosity,
     });
 
     connection.onInitialize(server.initialize.bind(server));
