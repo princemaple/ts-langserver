@@ -46,6 +46,7 @@ export function createLspConnection(options: ServerOptions): Connection {
   connection.onImplementation(server.implementation.bind(server));
   connection.onTypeDefinition(server.typeDefinition.bind(server));
   connection.onDocumentFormatting(server.documentFormatting.bind(server));
+  connection.onDocumentRangeFormatting(server.documentRangeFormatting.bind(server));
   connection.onDocumentHighlight(server.documentHighlight.bind(server));
   connection.onDocumentSymbol(server.documentSymbol.bind(server));
   connection.onExecuteCommand(server.executeCommand.bind(server));
