@@ -14,54 +14,54 @@ import debounce from 'p-debounce';
 import {LspDocuments} from './document';
 
 class FileDiagnostics {
-    private readonly diagnosticsPerKind = new Map<EventTypes, tsp.Diagnostic[]>();
+  private readonly diagnosticsPerKind = new Map<EventTypes, tsp.Diagnostic[]>();
 
-    constructor(
-        protected readonly uri: string,
-        protected readonly publishDiagnostics: (params: lsp.PublishDiagnosticsParams) => void,
-        protected readonly documents: LspDocuments,
-    ) {}
+  constructor(
+    protected readonly uri: string,
+    protected readonly publishDiagnostics: (params: lsp.PublishDiagnosticsParams) => void,
+    protected readonly documents: LspDocuments,
+  ) {}
 
-    update(kind: EventTypes, diagnostics: tsp.Diagnostic[]): void {
-        this.diagnosticsPerKind.set(kind, diagnostics);
-        this.firePublishDiagnostics();
+  update(kind: EventTypes, diagnostics: tsp.Diagnostic[]): void {
+    this.diagnosticsPerKind.set(kind, diagnostics);
+    this.firePublishDiagnostics();
+  }
+  protected readonly firePublishDiagnostics = debounce(() => {
+    const diagnostics = this.getDiagnostics();
+    this.publishDiagnostics({uri: this.uri, diagnostics});
+  }, 50);
+
+  protected getDiagnostics(): lsp.Diagnostic[] {
+    const result: lsp.Diagnostic[] = [];
+    for (const diagnostics of this.diagnosticsPerKind.values()) {
+      for (const diagnostic of diagnostics) {
+        result.push(toDiagnostic(diagnostic, this.documents));
+      }
     }
-    protected readonly firePublishDiagnostics = debounce(() => {
-        const diagnostics = this.getDiagnostics();
-        this.publishDiagnostics({uri: this.uri, diagnostics});
-    }, 50);
-
-    protected getDiagnostics(): lsp.Diagnostic[] {
-        const result: lsp.Diagnostic[] = [];
-        for (const diagnostics of this.diagnosticsPerKind.values()) {
-            for (const diagnostic of diagnostics) {
-                result.push(toDiagnostic(diagnostic, this.documents));
-            }
-        }
-        return result;
-    }
+    return result;
+  }
 }
 
 export class DiagnosticEventQueue {
-    protected readonly diagnostics = new Map<string, FileDiagnostics>();
+  protected readonly diagnostics = new Map<string, FileDiagnostics>();
 
-    constructor(
-        protected readonly publishDiagnostics: (params: lsp.PublishDiagnosticsParams) => void,
-        protected readonly documents: LspDocuments,
-        protected readonly logger: Logger,
-    ) {}
+  constructor(
+    protected readonly publishDiagnostics: (params: lsp.PublishDiagnosticsParams) => void,
+    protected readonly documents: LspDocuments,
+    protected readonly logger: Logger,
+  ) {}
 
-    updateDiagnostics(kind: EventTypes, event: tsp.DiagnosticEvent): void {
-        if (!event.body) {
-            this.logger.error(`Received empty ${event.event} diagnostics.`);
-            return;
-        }
-        const {file} = event.body;
-        const uri = pathToUri(file, this.documents);
-        const diagnostics =
-            this.diagnostics.get(uri) ||
-            new FileDiagnostics(uri, this.publishDiagnostics, this.documents);
-        diagnostics.update(kind, event.body.diagnostics);
-        this.diagnostics.set(uri, diagnostics);
+  updateDiagnostics(kind: EventTypes, event: tsp.DiagnosticEvent): void {
+    if (!event.body) {
+      this.logger.error(`Received empty ${event.event} diagnostics.`);
+      return;
     }
+    const {file} = event.body;
+    const uri = pathToUri(file, this.documents);
+    const diagnostics =
+      this.diagnostics.get(uri) ||
+      new FileDiagnostics(uri, this.publishDiagnostics, this.documents);
+    diagnostics.update(kind, event.body.diagnostics);
+    this.diagnostics.set(uri, diagnostics);
+  }
 }

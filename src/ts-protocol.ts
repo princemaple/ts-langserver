@@ -9,32 +9,30 @@
  * **IMPORTANT** this module should not depend on `vscode-languageserver` only protocol and types
  */
 import {
-    RequestType,
-    TextDocumentPositionParams,
-    InitializeParams,
-    InitializeResult,
+  RequestType,
+  TextDocumentPositionParams,
+  InitializeParams,
+  InitializeResult,
 } from 'vscode-languageserver-protocol';
 
 export namespace TypeScriptRenameRequest {
-    export const type = new RequestType<TextDocumentPositionParams, any, void>(
-        '_typescript.rename',
-    );
+  export const type = new RequestType<TextDocumentPositionParams, any, void>('_typescript.rename');
 }
 
 export interface TypeScriptPlugin {
-    name: string;
-    location: string;
+  name: string;
+  location: string;
 }
 
 export interface TypeScriptInitializationOptions {
-    logVerbosity?: string;
-    plugins: TypeScriptPlugin[];
+  logVerbosity?: string;
+  plugins: TypeScriptPlugin[];
 }
 
 export type TypeScriptInitializeParams = InitializeParams & {
-    initializationOptions?: Partial<TypeScriptInitializationOptions>;
+  initializationOptions?: Partial<TypeScriptInitializationOptions>;
 };
 
 export interface TypeScriptInitializeResult extends InitializeResult {
-    logFileUri?: string;
+  logFileUri?: string;
 }

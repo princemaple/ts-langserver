@@ -7,21 +7,27 @@
 
 import * as lsp from 'vscode-languageserver';
 import * as tsp from 'typescript/lib/protocol';
-import { Commands } from './commands';
-import { toTextDocumentEdit } from './protocol-translation';
-import { LspDocuments } from './document';
+import {Commands} from './commands';
+import {toTextDocumentEdit} from './protocol-translation';
+import {LspDocuments} from './document';
 
-export function provideQuickFix(response: tsp.GetCodeFixesResponse | undefined, result: (lsp.Command | lsp.CodeAction)[], documents: LspDocuments | undefined): void {
-    if (!response || !response.body) {
-        return;
-    }
-    for (const fix of response.body) {
-        result.push({
-            title: fix.description,
-            command: Commands.APPLY_WORKSPACE_EDIT,
-            arguments: [<lsp.WorkspaceEdit>{
-                documentChanges: fix.changes.map(c => toTextDocumentEdit(c, documents))
-            }]
-        })
-    }
+export function provideQuickFix(
+  response: tsp.GetCodeFixesResponse | undefined,
+  result: (lsp.Command | lsp.CodeAction)[],
+  documents: LspDocuments | undefined,
+): void {
+  if (!response || !response.body) {
+    return;
+  }
+  for (const fix of response.body) {
+    result.push({
+      title: fix.description,
+      command: Commands.APPLY_WORKSPACE_EDIT,
+      arguments: [
+        <lsp.WorkspaceEdit>{
+          documentChanges: fix.changes.map(c => toTextDocumentEdit(c, documents)),
+        },
+      ],
+    });
+  }
 }

@@ -9,40 +9,40 @@ import * as lsp from 'vscode-languageserver';
 import {TypeScriptRenameRequest} from './ts-protocol';
 
 export interface LspClient {
-    publishDiagnostics(args: lsp.PublishDiagnosticsParams): void;
-    showMessage(args: lsp.ShowMessageParams): void;
-    logMessage(args: lsp.LogMessageParams): void;
-    applyWorkspaceEdit(args: lsp.ApplyWorkspaceEditParams): Promise<lsp.ApplyWorkspaceEditResponse>;
-    telemetry(args: any): void;
-    rename(args: lsp.TextDocumentPositionParams): Promise<any>;
+  publishDiagnostics(args: lsp.PublishDiagnosticsParams): void;
+  showMessage(args: lsp.ShowMessageParams): void;
+  logMessage(args: lsp.LogMessageParams): void;
+  applyWorkspaceEdit(args: lsp.ApplyWorkspaceEditParams): Promise<lsp.ApplyWorkspaceEditResponse>;
+  telemetry(args: any): void;
+  rename(args: lsp.TextDocumentPositionParams): Promise<any>;
 }
 
 export class LspClientImpl implements LspClient {
-    constructor(protected connection: lsp.Connection) {}
+  constructor(protected connection: lsp.Connection) {}
 
-    publishDiagnostics(args: lsp.PublishDiagnosticsParams): void {
-        this.connection.sendNotification(lsp.PublishDiagnosticsNotification.type, args);
-    }
+  publishDiagnostics(args: lsp.PublishDiagnosticsParams): void {
+    this.connection.sendNotification(lsp.PublishDiagnosticsNotification.type, args);
+  }
 
-    showMessage(args: lsp.ShowMessageParams): void {
-        this.connection.sendNotification(lsp.ShowMessageNotification.type, args);
-    }
+  showMessage(args: lsp.ShowMessageParams): void {
+    this.connection.sendNotification(lsp.ShowMessageNotification.type, args);
+  }
 
-    logMessage(args: lsp.LogMessageParams): void {
-        this.connection.sendNotification(lsp.LogMessageNotification.type, args);
-    }
+  logMessage(args: lsp.LogMessageParams): void {
+    this.connection.sendNotification(lsp.LogMessageNotification.type, args);
+  }
 
-    telemetry(args: any): void {
-        this.connection.sendNotification(lsp.TelemetryEventNotification.type, args);
-    }
+  telemetry(args: any): void {
+    this.connection.sendNotification(lsp.TelemetryEventNotification.type, args);
+  }
 
-    async applyWorkspaceEdit(
-        args: lsp.ApplyWorkspaceEditParams,
-    ): Promise<lsp.ApplyWorkspaceEditResponse> {
-        return this.connection.sendRequest(lsp.ApplyWorkspaceEditRequest.type, args);
-    }
+  async applyWorkspaceEdit(
+    args: lsp.ApplyWorkspaceEditParams,
+  ): Promise<lsp.ApplyWorkspaceEditResponse> {
+    return this.connection.sendRequest(lsp.ApplyWorkspaceEditRequest.type, args);
+  }
 
-    async rename(args: lsp.TextDocumentPositionParams): Promise<any> {
-        return this.connection.sendRequest(TypeScriptRenameRequest.type, args);
-    }
+  async rename(args: lsp.TextDocumentPositionParams): Promise<any> {
+    return this.connection.sendRequest(TypeScriptRenameRequest.type, args);
+  }
 }
