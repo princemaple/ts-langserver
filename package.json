@@ -39,6 +39,6 @@
     "@types/fs-extra": "9.0.6",
     "@types/p-debounce": "1.0.1",
     "@types/tempy": "0.2.0",
-    "chai": "4.2.0"
+    "chai": "4.3.0"
   }
 }
